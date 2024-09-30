@@ -34,6 +34,7 @@ signal[:,7] = sin.(200*2pi.*t)
 signal[:,8] = sin.(50*2pi.*t)
 p1 = plot(t, signal[:,1], title = "Signal") 
 
+#FFT
 F = fft(signal,1)
 freqs = fftfreq(length(t), 1.0/Ts)
 p2 = plot(freqs, abs2.(F[:,1]), title = "FFT")
