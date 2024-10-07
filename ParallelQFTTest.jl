@@ -6,13 +6,13 @@ R = 2^r
 
 #If importing, comment out sites= under #QFT
 print("Loading... ")
-f = h5open("/home/hayde/coding/projects/QFBE/QFT_MPO_Size"*string(n)*"_Cutoff1E10.h5","r")
+f = h5open("/home/hayde/coding/projects/QFBE/QFT_MPO_Size"*string(n)*"by"*string(r)*"_Cutoff1E10.h5","r")
 H = read(f,"H",MPO)
 close(f)
 sites_imported = siteinds(H)
 sites = Index{Int64}[] #only need the unprimed sites
 print(sites_imported)
-for x=1:n
+for x=1:n+r
     push!(sites, sites_imported[x][2])
 end
 print("Done!")
@@ -40,14 +40,12 @@ freqs = fftfreq(length(t), 1.0/Ts)
 p2 = plot(freqs, abs2.(F[:,1]), title = "FFT")
 
 #QFT
-sites_Y = Index(R)
-A = ITensor(signal, sites, sites_Y)
-U, S, V = svd(A,sites_Y)
-V = S*V
-psi = MPS(V,sites;cutoff=1E-10)
+psi = MPS(signal,sites;cutoff=1E-10)
 MPS_QFT = apply(H,psi;cutoff=1E-10)
-Contracted_MPS_QFT = U*contract(MPS_QFT)
-MPS_QFT_vec = reshape(Array(Contracted_MPS_QFT,(sites_Y, reverse(sites))),R,N)
+sites_X = (reverse(sites[1:n]))#,sites[n+1:r])
+sites_Y = sites[n+1:n+r]
+Contracted_MPS_QFT = contract(MPS_QFT)
+MPS_QFT_vec = reshape(vec(Array(Contracted_MPS_QFT,(sites_Y,sites_X))),R,N)
 QFT_Result = abs2.(MPS_QFT_vec[1,:])
 p3 = plot(freqs, QFT_Result, title = "QFT")
 
